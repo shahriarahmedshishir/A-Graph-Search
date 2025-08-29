@@ -1,8 +1,8 @@
-def shortest_path(edges, start, goal):
+def shortest_path(edges, heuristic, start, goal):
     graph = {}
     for x, y, z in edges:
         graph[x] = graph.get(x, []) + [(y, z)]
-        graph[y] = graph.get(y, []) + [(x, z)]  
+        graph[y] = graph.get(y, []) + [(x, z)]
 
     distance = {node: float('inf') for node in graph}
     parent = {node: None for node in graph}
@@ -10,10 +10,13 @@ def shortest_path(edges, start, goal):
     unvisited = set(graph)
 
     while unvisited:
-        current = min(unvisited, key=lambda node: distance[node])
-        unvisited.remove(current)
+        current = min(unvisited, key=lambda node: distance[node] + heuristic[node])
+        
         if current == goal:
             break
+        
+        unvisited.remove(current)
+
         for neighbor, cost in graph[current]:
             new_dist = distance[current] + cost
             if new_dist < distance[neighbor]:
@@ -35,18 +38,28 @@ def is_consistent(edges, h_value):
             return False
     return True
 
+edges = []
+heuristic_value = []
+no_of_vertices, no_of_edges = map(int, input("Enter vertices edges: ").split())
 
-edges = [
-    [0,1,2],[0,2,4],[0,3,4],[1,4,5],[1,5,3],
-    [2,5,7],[3,5,3],[3,6,8],[4,7,6],[5,7,4],
-    [5,9,5],[6,9,6],[7,8,2],[9,8,2]
-]
-heuristic_value = [10,7,6,8,5,4,3,1,0,1]
+edges = []
+for _ in range(no_of_edges):
+    u, v, cost = map(int, input().split())
+    edges.append((u, v, cost))
 
-path, cost = shortest_path(edges, 0, 8)
-print("Shortest Path:", path)
+heuristic_value = list(map(int, input("Enter heuristic values: ").split()))
+goal_index = -1 
+
+for index, value in enumerate(heuristic_value):
+  if value == 0:
+    goal_index = index
+    break
+
+path, cost = shortest_path(edges, heuristic_value, 0, goal_index)
+print("A* Search Path:", path)
 print("Total Cost:", cost)
+
 if is_consistent(edges, heuristic_value):
-    print("It is Consistent")
+    print("The heuristic is Consistent")
 else:
-    print("It is Inconsistent")
+    print("The heuristic is Inconsistent")
